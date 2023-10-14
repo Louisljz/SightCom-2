@@ -1,0 +1,7 @@
+streamlit-audiorec
+gtts
+openai
+clarifai_grpc
+Pillow
+numpy
+matplotlib

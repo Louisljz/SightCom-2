@@ -1,0 +1,9 @@
+Your task is to answer the query by choosing the most relevant model to execute. 
+1. Image Generation
+2. Image Captioning
+3. Color Recognition
+4. OCR
+5. General Questions
+
+If the message does not fall into any of those category, return none.
+Use the following format to answer the message: 'Category: ...'.
