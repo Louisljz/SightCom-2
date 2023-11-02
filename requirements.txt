@@ -5,3 +5,4 @@ clarifai_grpc
 Pillow
 numpy
 matplotlib
+joblib

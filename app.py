@@ -5,6 +5,7 @@ import openai
 from gtts import gTTS
 from clarifai_helpers import ClarifaiModel
 
+import joblib
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -16,17 +17,18 @@ from textwrap import wrap
 from urllib.request import urlopen
 
 
-
 st.set_page_config('SightCom 2', '🤖')
-st.title('SightCom 2 🤖')
-
 openai.api_key = st.secrets['openai_key']
-with open('system_roles/main_role.txt', 'r') as f:
-    main_role = f.read()
-with open('system_roles/dalle_role.txt', 'r') as f:
-    dalle_role = f.read()
-with open('system_roles/qna_role.txt', 'r') as f:
-    qna_role = f.read()
+
+@st.cache_data
+def load_data():
+    with open('system_roles/dalle_role.txt', 'r') as f:
+        dalle_role = f.read()
+    with open('system_roles/qna_role.txt', 'r') as f:
+        qna_role = f.read()
+
+    classifier = joblib.load('language_classifier.joblib')
+    return dalle_role, qna_role, classifier
 
 def speak(script):
     speech_bytes = BytesIO()
@@ -34,8 +36,13 @@ def speak(script):
     tts.write_to_fp(speech_bytes)
     st.audio(speech_bytes)
 
+
+dalle_role, qna_role, classifier = load_data()
+
+st.title('SightCom 2 🤖')
 cam = st.camera_input('Take a photo')
 mode = st.radio('Choose input mode', ['speak', 'type'])
+
 if mode == 'speak':
     audio_bytes = st_audiorec()
     if audio_bytes:
@@ -56,19 +63,10 @@ else:
     query = st.text_input('Type your query.')
 
 if query:
-    with st.spinner('Assigning role..'):
-        classifier = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": main_role},
-                {"role": "user", "content": query}
-            ]
-        )
-    category = classifier.choices[0].message.content
+    category = classifier.predict([query])[0]
     st.write(category)
-    category = category.lower()
 
-    if 'image generation' in category:
+    if category == 'Image Generation':
         with st.spinner('Creating Descriptions..'):
             art_creator = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
@@ -106,7 +104,7 @@ if query:
         st.pyplot(fig)
         speak(' '.join(prompts))
 
-    elif 'questions' in category:
+    elif category == 'General Questions':
         with st.spinner('Generating answer..'):
             qna_bot = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
@@ -119,7 +117,7 @@ if query:
         st.info('Answer: ' + answer)
         speak(answer)
 
-    elif 'image captioning' in category:
+    elif category == 'Image Captioning':
         if cam:
             image_captioner = ClarifaiModel(st.secrets['clarifai_key'], 'salesforce', 'blip', 'general-english-image-caption-blip-2')
             image = Image.open(cam)
@@ -131,7 +129,7 @@ if query:
         else:
             st.warning('take a photo first')
 
-    elif 'ocr' in category:
+    elif category == 'OCR':
         if cam:
             ocr = ClarifaiModel(st.secrets['clarifai_key'], 'clarifai', 'main', 'ocr-scene-english-paddleocr')
             image = Image.open(cam)
@@ -149,7 +147,7 @@ if query:
         else:
             st.warning('take a photo first')
 
-    elif 'color recognition' in category:
+    elif category == 'Color Recognition':
         if cam:
             color_recognizer = ClarifaiModel(st.secrets['clarifai_key'], 'clarifai', 'main', 'color-recognition')
             image = Image.open(cam)
