@@ -8,7 +8,7 @@ SightCom2 software utilizes OpenAI technologies, namely Whisper for speech trans
 This software is served on streamlit cloud, and is a prototype that can potentially be deployed on a microprocessor, assembled in an integrated circuit, between input devices like camera and microphone, and output devices like speakers. 
 
 ## How it works? 
-![SightCom 2 Flowchart](https://github.com/Louisljz/SightCom-2/blob/main/SightCom%202%20FlowChart.png)
+![SightCom 2 Flowchart](https://github.com/Louisljz/SightCom-2/blob/main/images/SightCom%202%20FlowChart.png)
 
 ## Run App Locally
 1. **Clone the Repository**:  

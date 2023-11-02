@@ -27,7 +27,7 @@ def load_data():
     with open('system_roles/qna_role.txt', 'r') as f:
         qna_role = f.read()
 
-    classifier = joblib.load('language_classifier.joblib')
+    classifier = joblib.load('training/language_classifier.joblib')
     return dalle_role, qna_role, classifier
 
 def speak(script):
