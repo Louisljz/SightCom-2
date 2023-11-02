@@ -6,3 +6,4 @@ Pillow
 numpy
 matplotlib
 joblib
+scikit-learn
